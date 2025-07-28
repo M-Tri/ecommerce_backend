@@ -3,7 +3,7 @@ import { User } from '../models/User.js';
 
 const router = express.Router();
 
-// Create a new user
+// When someone sends data to the POST method on the / path (like submitting a form to /users), run this function.
 router.post('/', async (req, res) => {
   try {
     const user = await User.create(req.body);
