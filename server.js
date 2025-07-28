@@ -17,9 +17,13 @@ const PORT = process.env.PORT || 3000;
     await sequelize.sync();
     console.log('Database synced.');
 
+    //Accepts cross-origin requests (client, server are from the same pc or network). This is disabled by default.
     app.use(cors());
-    app.use(express.json());
-
+    // Parses incoming request bodies with JSON payloads,
+    // so you can access the data as a JavaScript object via req.body.
+    app.use(express.json());    app.use(express.json());
+    // Mounts all routes defined in 'routes' at the root path '/'. 
+    // So, any routes inside 'routes' (like '/users', '/posts', etc.) will be accessible starting from '/'.
     app.use('/', routes);
 
     app.listen(PORT, () => {
