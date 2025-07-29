@@ -5,6 +5,9 @@ import routes from './routes/index.js';
 import { sequelize } from './db.js';
 import './models/index.js';
 
+import { defaultProducts } from './defaultData/defaultProducts.js';
+import { Product } from './models/index.js';
+
 dotenv.config();
 
 const app = express();
@@ -15,16 +18,21 @@ const PORT = process.env.PORT || 3000;
     await sequelize.authenticate();
     console.log('Connection to SQLite has been established successfully.');
 
-    await sequelize.sync();
+    // await sequelize.sync();
+    await sequelize.sync({ force: true });
+
     console.log('Database synced.');
 
-    //Accepts cross-origin requests (client, server are from the same pc or network). This is disabled by default.
+    // Seed products if table is empty
+    const productCount = await Product.count();
+    if (productCount === 0) {
+      await Product.bulkCreate(defaultProducts);
+      console.log('Inserted default products into database.');
+    }
+
     app.use(cors());
-    // Parses incoming request bodies with JSON payloads,
-    // so you can access the data as a JavaScript object via req.body.
-    app.use(express.json());    app.use(express.json());
-    // Mounts all routes defined in 'routes' at the root path '/'. 
-    // So, any routes inside 'routes' (like '/users', '/posts', etc.) will be accessible starting from '/'.
+    app.use(express.json());
+
     app.use('/', routes);
 
     app.listen(PORT, () => {
