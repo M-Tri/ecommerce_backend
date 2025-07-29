@@ -36,6 +36,17 @@ node server.js
 ### Notes
 --- 
 ---
+
+#### export vs export default
+
+* **`export`**: You need to export and import the **exact name**, and you must use `{}` when importing.
+* **`export default`**: You can export and import using **any name**, and you **do not** use `{}` when importing.
+
+#### July 29, things to consider for next session:
+- This is temp : await sequelize.sync({ force: true }); It deletes data every time before inserting the default product. Fix after testing.
+- Data models are not complete. Check if some values are must not be null. This will cause error when data for row is not complet (does not have all feilds like products does not have stars ...)
+- run with node server.js
+- Temp data can be seen at http://localhost:3000/api/products
 #### MVC
 ---
 #### MVC in Express + Sequelize (No View Layer)
