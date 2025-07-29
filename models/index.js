@@ -1,6 +1,13 @@
-// models/index.js
-export { Product } from './Products.js';
-export { CartItem } from './Cart.js';
-export { DeliveryOption } from './DeliveryOptions.js';
-export { Order } from './Orders.js';
-export { OrderProduct } from './OrderProduct.js';
+import { Product } from './Products.js';
+import { CartItem } from './Cart.js';
+import { DeliveryOption } from './DeliveryOptions.js';
+import { Order } from './Orders.js';
+import { OrderProduct} from './OrderProduct.js';
+
+export {
+  Product,
+  CartItem,
+  DeliveryOption,
+  Order,
+  OrderProduct,
+};
