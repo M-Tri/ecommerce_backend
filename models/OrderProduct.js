@@ -1,16 +1,19 @@
-import { sequelize } from '../db.js';  // Adjust the path as needed
-import { DataTypes } from 'sequelize';
-
 // models/OrderProduct.js
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../db.js';
+
 export const OrderProduct = sequelize.define('OrderProduct', {
-  orderId: {
+  id: {
     type: DataTypes.UUID,
-    allowNull: false,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
   },
-  productId: {
-    type: DataTypes.UUID,
-    allowNull: false,
+  quantity: {
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
-  quantity: DataTypes.INTEGER,
-  estimatedDeliveryTimeMs: DataTypes.BIGINT,
+  estimatedDeliveryTimeMs: {
+    type: DataTypes.BIGINT,
+    allowNull: false
+  }
 });

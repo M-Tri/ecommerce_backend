@@ -1,16 +1,35 @@
-// models/Product.js
-import { sequelize } from '../db.js';  // Adjust the path as needed
+// models/Products.js
 import { DataTypes } from 'sequelize';
+import { sequelize } from '../db.js';
 
 export const Product = sequelize.define('Product', {
   id: {
     type: DataTypes.UUID,
-    primaryKey: true,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
   },
-  image: DataTypes.STRING,
-  name: DataTypes.STRING,
-  priceCents: DataTypes.INTEGER,
-  ratingStars: DataTypes.FLOAT,
-  ratingCount: DataTypes.INTEGER,
-  keywords: DataTypes.JSON, // could be stored as text or array depending on DB
+  image: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  stars: {
+    type: DataTypes.FLOAT,
+    allowNull: true
+  },
+  ratingCount: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  priceCents: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  keywords: {
+    type: DataTypes.JSON,  // stores array of keywords like ["kitchen", "cookware"]
+    allowNull: true
+  }
 });
