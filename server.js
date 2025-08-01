@@ -4,9 +4,11 @@ import cors from 'cors';
 import routes from './routes/index.js';
 import { sequelize } from './db.js';
 import './models/index.js';
-
 import { defaultProducts } from './defaultData/defaultProducts.js';
 import { Product } from './models/index.js';
+import { defaultDeliveryOptions } from './defaultData/defaultDeliveryOptions.js';
+import { DeliveryOption } from './models/index.js';
+
 
 dotenv.config();
 
@@ -30,10 +32,17 @@ const PORT = process.env.PORT || 3000;
       console.log('Inserted default products into database.');
     }
 
+    // Seed delivery options if table is empty
+    const deliveryOptionCount = await DeliveryOption.count();
+    if (deliveryOptionCount === 0) {
+      await DeliveryOption.bulkCreate(defaultDeliveryOptions);
+      console.log('Inserted default delivery options into database.');
+    }
+
     app.use(cors());
     app.use(express.json());
-    
-    // Whenever someone visits /images/anything, go look for a matching file inside the images/ folder.
+
+    // Whenever someone visits .../images/anything, go look for a matching file inside the images/ folder.
     app.use('/images', express.static('images'));
 
     app.use('/', routes);
