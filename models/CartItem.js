@@ -1,4 +1,4 @@
-import { sequelize } from '../db.js';  // Adjust the path as needed
+import { sequelize } from '../db.js';
 import { DataTypes } from 'sequelize';
 
 // models/CartItem.js
