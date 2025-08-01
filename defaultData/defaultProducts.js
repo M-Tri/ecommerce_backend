@@ -1,18 +1,34 @@
 // defaultProducts.js
 export const defaultProducts = [
-  {
-    name: 'Wireless Mouse',
-    price: 25.99,
-    description: 'Ergonomic wireless mouse with 2.4GHz connection.',
-  },
-  {
-    name: 'Mechanical Keyboard',
-    price: 89.99,
-    description: 'RGB backlit keyboard with blue switches.',
-  },
-  {
-    name: 'HD Monitor',
-    price: 199.99,
-    description: '24-inch full HD monitor with HDMI support.',
+   {
+    id: '8c9c52b5-5a19-4bcb-a5d1-158a74287c53',
+    image: 'images/products/3-piece-cooking-set.jpg',
+    name: '3 Piece Non-Stick, Black Cooking Pot Set',
+    rating: {
+      stars: 4.5,
+      count: 175
+    },
+    priceCents: 3499,
+    keywords: ['kitchen', 'cookware']
+  },{
+    id: '83d4ca15-0f35-48f5-b7a3-1ea210004f2e',
+    image: 'images/products/adults-plain-cotton-tshirt-2-pack-teal.jpg',
+    name: 'Adults Plain Cotton T-Shirt - 2 Pack',
+    rating: {
+      stars: 4.5,
+      count: 56
+    },
+    priceCents: 799,
+    keywords: ['tshirts', 'apparel', 'mens']
+  },{
+    id: 'a434b69f-1bc1-482d-9ce7-cd7f4a66ce8d',
+    image: 'images/products/vanity-mirror-pink.jpg',
+    name: 'Vanity Mirror with LED Lights - Pink',
+    rating: {
+      stars: 4.5,
+      count: 130
+    },
+    priceCents: 2549,
+    keywords: ['bathroom', 'washroom', 'mirrors', 'home']
   },
 ];

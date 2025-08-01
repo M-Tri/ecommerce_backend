@@ -32,6 +32,9 @@ const PORT = process.env.PORT || 3000;
 
     app.use(cors());
     app.use(express.json());
+    
+    // Whenever someone visits /images/anything, go look for a matching file inside the images/ folder.
+    app.use('/images', express.static('images'));
 
     app.use('/', routes);
 
