@@ -1,12 +1,19 @@
-import { sequelize } from '../db.js';  // Adjust the path as needed
-import { DataTypes } from 'sequelize';
-
 // models/DeliveryOption.js
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../db.js';
+
 export const DeliveryOption = sequelize.define('DeliveryOption', {
   id: {
     type: DataTypes.STRING,
     primaryKey: true,
+    allowNull: false
   },
-  deliveryDays: DataTypes.INTEGER,
-  priceCents: DataTypes.INTEGER,
+  deliveryDays: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  priceCents: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  }
 });
