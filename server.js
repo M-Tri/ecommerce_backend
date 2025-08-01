@@ -8,6 +8,8 @@ import { defaultProducts } from './defaultData/defaultProducts.js';
 import { Product } from './models/index.js';
 import { defaultDeliveryOptions } from './defaultData/defaultDeliveryOptions.js';
 import { DeliveryOption } from './models/index.js';
+import { defaultCartItem } from './defaultData/defaultCartItem.js';
+import { CartItem } from './models/index.js';
 
 
 dotenv.config();
@@ -37,6 +39,12 @@ const PORT = process.env.PORT || 3000;
     if (deliveryOptionCount === 0) {
       await DeliveryOption.bulkCreate(defaultDeliveryOptions);
       console.log('Inserted default delivery options into database.');
+    }
+
+    const cartItemCount = await CartItem.count();
+    if (cartItemCount === 0) {
+      await CartItem.bulkCreate(defaultCartItem);
+      console.log('Inserted default cart Items into database');
     }
 
     app.use(cors());
