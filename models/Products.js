@@ -29,7 +29,7 @@ export const Product = sequelize.define('Product', {
     allowNull: true
   },
   keywords: {
-    type: DataTypes.JSON,  // stores array of keywords like ["kitchen", "cookware"]
+    type: DataTypes.JSON,
     allowNull: true
   }
 });

@@ -15,7 +15,7 @@ router.get('/', home);
 // api is just for clarity. It tells the client that they are using the backend.
 router.use('/products', productRoutes);
 router.use('/orders', orderRoutes);
-router.use('/cartItem', cartItemRoutes);
+router.use('/cart-items', cartItemRoutes);
 router.use('/delivery-options', deliveryOptionsRoutes);
 
 export default router;
