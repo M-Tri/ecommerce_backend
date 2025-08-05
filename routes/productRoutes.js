@@ -1,5 +1,7 @@
 import express from 'express';
+import { CartItem } from '../models/index.js';
 import { Product } from '../models/Products.js';
+import { sequelize } from '../db.js';
 
 const router = express.Router();
 
@@ -52,13 +54,23 @@ router.put('/:id', async (req, res) => {
 
 // DELETE /products/:id - Delete a product
 router.delete('/:id', async (req, res) => {
+  const t = await sequelize.transaction();
   try {
-    const deletedCount = await Product.destroy({ where: { id: req.params.id } });
+    // Delete related cart items first
+    await CartItem.destroy({ where: { productId: req.params.id }, transaction: t });
+
+    // Delete the product
+    const deletedCount = await Product.destroy({ where: { id: req.params.id }, transaction: t });
+
     if (deletedCount === 0) {
+      await t.rollback();
       return res.status(404).json({ error: 'Product not found' });
     }
+
+    await t.commit();
     res.status(204).send();
   } catch (err) {
+    await t.rollback();
     res.status(500).json({ error: err.message });
   }
 });
