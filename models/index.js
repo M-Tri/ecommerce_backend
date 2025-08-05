@@ -8,6 +8,10 @@ import { OrderProduct} from './OrderProduct.js';
 CartItem.belongsTo(Product, { foreignKey: 'productId' });
 Product.hasMany(CartItem, { foreignKey: 'productId' });
 
+//  Many-to-many relationship between Orders and Products via OrderProduct
+Order.belongsToMany(Product, { through: OrderProduct, foreignKey: 'orderId' });
+Product.belongsToMany(Order, { through: OrderProduct, foreignKey: 'productId' });
+
 export {
   Product,
   CartItem,

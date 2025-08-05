@@ -1,12 +1,23 @@
 import express from 'express';
 import { Order } from '../models/Orders.js';
+import { Product } from '../models/Products.js';
 
 const router = express.Router();
 
 // GET /orders - List all orders
 router.get('/', async (req, res) => {
   try {
-    const orders = await Order.findAll();
+    const { expand } = req.query;
+
+    let orders;
+    if (expand === 'products') {
+      orders = await Order.findAll({
+        include: [{ model: Product }]
+      });
+    } else {
+      orders = await Order.findAll();
+    }
+
     res.json(orders);
   } catch (err) {
     res.status(500).json({ error: err.message });
