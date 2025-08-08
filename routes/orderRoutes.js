@@ -191,21 +191,85 @@ router.post('/', async (req, res) => {
   }
 });
 
-
-// PUT /orders/:id - Update an existing order
+// PUT /orders/:id
 router.put('/:id', async (req, res) => {
   try {
+    const { cart } = req.body;
     const order = await Order.findByPk(req.params.id);
+
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    await order.update(req.body);
-    res.json(order);
+    if (!cart || !Array.isArray(cart) || cart.length === 0) {
+      return res.status(400).json({ error: 'Cart must contain products' });
+    }
+
+    // Same logic as POST: fetch products, delivery options, recalculate costs
+    const productIds = cart.map(item => item.productId);
+    const dbProducts = await Product.findAll({ where: { id: productIds } });
+
+    const deliveryOptionIds = [...new Set(cart.map(item => item.deliveryOptionId))];
+    const deliveryOptions = await DeliveryOption.findAll({
+      where: { id: deliveryOptionIds }
+    });
+
+    if (dbProducts.length !== cart.length || deliveryOptions.length !== deliveryOptionIds.length) {
+      return res.status(400).json({ error: 'Invalid products or delivery options' });
+    }
+
+    let subtotalCents = 0;
+    let totalShippingCents = 0;
+
+    const updatedItems = cart.map(item => {
+      const product = dbProducts.find(p => p.id === item.productId);
+      const delivery = deliveryOptions.find(d => d.id === item.deliveryOptionId);
+
+      subtotalCents += product.priceCents * item.quantity;
+      totalShippingCents += delivery.priceCents;
+
+      return {
+        productId: item.productId,
+        quantity: item.quantity,
+        estimatedDeliveryTimeMs: Date.now() + (delivery.deliveryDays * 24 * 60 * 60 * 1000)
+      };
+    });
+
+    const taxCents = Math.round((subtotalCents + totalShippingCents) * 0.1);
+    const totalCostCents = subtotalCents + totalShippingCents + taxCents;
+
+    // Update order cost and time
+    await order.update({
+      orderTimeMs: Date.now(),
+      totalCostCents
+    });
+
+    // Clear existing OrderProducts
+    await OrderProduct.destroy({ where: { orderId: order.id } });
+
+    // Create new ones
+    await Promise.all(updatedItems.map(item =>
+      OrderProduct.create({
+        orderId: order.id,
+        productId: item.productId,
+        quantity: item.quantity,
+        estimatedDeliveryTimeMs: item.estimatedDeliveryTimeMs
+      })
+    ));
+
+    return res.json({
+      id: order.id,
+      orderTimeMs: order.orderTimeMs,
+      totalCostCents: order.totalCostCents,
+      products: updatedItems
+    });
+
   } catch (err) {
+    console.error(err);
     res.status(400).json({ error: err.message });
   }
 });
+
 
 // DELETE /orders/:id - Delete/cancel an order
 router.delete('/:id', async (req, res) => {
