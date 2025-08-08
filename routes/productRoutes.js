@@ -28,29 +28,56 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /products - Create a new product
+//Todo: add admin restriction
 router.post('/', async (req, res) => {
   try {
-    const newProduct = await Product.create(req.body);
+    const body = req.body;
+
+    const newProduct = await Product.create({
+      id: body.id,
+      name: body.name,
+      image: body.image,
+      priceCents: body.priceCents,
+      keywords: body.keywords,
+
+      // Flatten nested rating if provided
+      stars: body.rating ? body.rating.stars : null,
+      ratingCount: body.rating ? body.rating.count : null
+    });
+
     res.status(201).json(newProduct);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-// PUT /products/:id - Update an existing product
+// PUT /products/:id.
+//Todo: add admin restriction
 router.put('/:id', async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
-    await product.update(req.body);
+
+    const body = req.body;
+
+    const updatedFields = {
+      name: body.name,
+      image: body.image,
+      priceCents: body.priceCents,
+      keywords: body.keywords,
+      stars: body.rating ? body.rating.stars : body.stars ?? null,
+      ratingCount: body.rating ? body.rating.count : body.ratingCount ?? null
+    };
+
+    await product.update(updatedFields);
     res.json(product);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
+
 
 // DELETE /products/:id - Delete a product
 router.delete('/:id', async (req, res) => {
