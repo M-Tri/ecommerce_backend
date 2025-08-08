@@ -5,6 +5,7 @@ import orderRoutes from './orderRoutes.js';
 import cartItemRoutes from './cartItemRoutes.js';
 import deliveryOptionsRoutes from './deliveryOptionsRoutes.js';
 import resetRoutes from './resetRoutes.js';
+import paymentSummaryRoutes from './paymentSummaryRoutes.js';
 
 
 const router = express.Router();
@@ -19,5 +20,6 @@ router.use('/orders', orderRoutes);
 router.use('/cart-items', cartItemRoutes);
 router.use('/delivery-options', deliveryOptionsRoutes);
 router.use('/reset', resetRoutes);
+router.use('/payment-summary', paymentSummaryRoutes);
 
 export default router;
