@@ -1,82 +1,178 @@
-# ecommerce_backend
+```markdown
+# Ecommerce Backend API
 
-### Map
---- 
 ---
-```pgsql
+
+## Overview
+
+This backend API is built with **Express** and **Sequelize** and follows the **MVC pattern** (without a view layer). It serves as the backend for an ecommerce application, providing RESTful endpoints for products, carts, orders, and more.
+
+---
+
+## Request Flow
+
+```
+
 Browser (Client)
-   ↓
+↓
 HTTP Request
-   ↓
-Express App (e.g. defined in server.js or app.js)
-   ↓
-Middleware (e.g. express.json(), cors(), etc.)
-   ↓
-Routes (mounted via app.use and matched by path/method)
-   ↓
-Controllers (functions that handle the request and send a response)
-   ↓
-HTTP Response (JSON, text, etc. sent back to client)
-```
-### Commands
----
+↓
+Express App (server.js / app.js)
+↓
+Middleware (e.g., express.json(), cors())
+↓
+Routes (via app.use, matched by path & method)
+↓
+Controllers (handle requests, send responses)
+↓
+HTTP Response (JSON, text, etc.)
+
+````
+
 ---
 
-```bash 
+## Setup and Commands
+
+Initialize a new Node.js project:
+
+```bash
 npm init -y
-```
-The -y Automatically answers "yes" to all prompts using the defaults.
+````
+
+> The `-y` flag automatically accepts all defaults.
+
+Install dependencies:
+
 ```bash
 npm install express dotenv
 ```
+
+Start the server:
+
 ```bash
 node server.js
 ```
 
-### Notes
---- 
 ---
 
-#### export vs export default
+## Code Structure & MVC Pattern
 
-* **`export`**: You need to export and import the **exact name**, and you must use `{}` when importing.
-* **`export default`**: You can export and import using **any name**, and you **do not** use `{}` when importing.
+### Model
 
----
----
----
-#### Check point: 
-#### July 29, things to consider for next session:
-- This is temp : await sequelize.sync({ force: true }); It deletes data every time before inserting the default product. Fix after testing.
-- Data models are not complete. Check if some values are must not be null. This will cause error when data for row is not complete (does not have all fields like products does not have stars ...)
-- run with node server.js
-- Temp data can be seen at http://localhost:3000/api/products
+* Defined using **Sequelize** to represent database tables.
+* Provides built-in methods like `findAll()`, `create()`, `findByPk()`.
+* These methods are called by controllers but do not execute on their own.
 
+### Controller (Route Handlers)
 
+* Handle application logic.
+* Call model methods in response to HTTP requests.
+* Send JSON responses directly to clients.
 
-#### MVC
----
-#### MVC in Express + Sequelize (No View Layer)
+### No View Layer
 
-This backend API follows the MVC pattern, but without a view layer. Here's a summary of how the components work:
+* This is a pure API backend.
+* No frontend views or templates — data is sent in JSON format.
 
 ---
 
-##### ✅ Model
+## Important Notes
 
-1. The model is defined using Sequelize and represents **the structure of a database table (table definitions)**.  
-2. Sequelize automatically provides methods like `findAll()`, `create()`, and `findByPk()` on the model for interacting with the database(like a class).  
-3. These methods exist on the model (e.g. `User.findAll()`), but they do not execute unless explicitly called from controller or route.
+### Export Syntax
+
+* `export`:
+  Must export and import with **exact names** using `{}`.
+
+  ```js
+  export function foo() { }
+  import { foo } from './file.js';
+  ```
+
+* `export default`:
+  Export and import using **any name** without `{}`.
+
+  ```js
+  export default function foo() { }
+  import anyName from './file.js';
+  ```
 
 ---
 
-##### ✅ Controller (or Route)
+## Development Log
 
-4. The controller or route calls these model methods in response to HTTP requests.  
-5. This keeps the model focused on defining and managing data, while the controller handles application logic and request flow.
+### July 29
+
+* Temporary use of `await sequelize.sync({ force: true });` resets DB on every start — remove after testing.
+* Data models need refining for `NOT NULL` constraints to avoid missing fields errors.
+* Temp data available at `http://localhost:3000/api/products`.
+
+### July 31
+
+* Changed API endpoint:
+  from `/api/products` to `/products`.
+* Note: Tables are dropped and recreated on every server restart.
+* Run lint fix:
+
+  ```bash
+  npx eslint . --fix
+  ```
+
+### August 2
+
+* Added PUT request for updating cart items (quantity, delivery option).
+
+* Sample PUT request in Postman:
+
+  ```
+  URL: cart-items/8c9c52b5-5a19-4bcb-a5d1-158a74287c53
+  Body:
+  {
+    "quantity": 5,
+    "deliveryOption": 2
+  }
+  ```
+
+* Database reset behavior should be checked—SQLite appears to persist some data.
+
+### August 3
+
+* Tested PUT requests with JSON body:
+
+  ```json
+  {
+    "quantity": 3,
+    "deliveryOption": "2"
+  }
+  ```
+
+* Some routes require **admin authorization** (to be implemented).
+
+* Investigate Sequelize many-to-many setup between Orders and Products:
+
+  ```js
+  Order.belongsToMany(Product, { through: OrderProduct, foreignKey: 'orderId' });
+  Product.belongsToMany(Order, { through: OrderProduct, foreignKey: 'productId' });
+  ```
+
+### August 7
+
+* Many-to-Many relationship explained:
+
+  * One Order can contain many Products.
+  * One Product can belong to many Orders.
+  * A join table (`OrderProduct`) is required to map this relationship.
 
 ---
 
-##### 🚫 No View Layer
+## Next Steps
 
-6. There is no "view" layer in this backend — instead, the controller sends JSON responses directly to the client.
+* Remove forced DB sync in production.
+* Implement admin authorization middleware.
+* Complete and refine data models.
+* Expand API functionality (e.g., order management, user authentication).
+
+---
+
+## License
+
+This project is open source and free to use.
