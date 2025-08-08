@@ -2,18 +2,40 @@ import express from 'express';
 import { CartItem } from '../models/index.js';
 import { Product } from '../models/Products.js';
 import { sequelize } from '../db.js';
+import { Op, fn, col } from 'sequelize';
 
 const router = express.Router();
 
-// GET /products - List all products
 router.get('/', async (req, res) => {
   try {
-    const products = await Product.findAll();
+    const search = req.query.search;
+
+    let whereClause = {};
+
+    if (search) {
+      const searchLower = search.toLowerCase();
+
+      whereClause = {
+        [Op.or]: [
+          sequelize.where(fn('lower', col('name')), {
+            [Op.like]: `%${searchLower}%`
+          }),
+          sequelize.where(fn('lower', col('keywords')), {
+            [Op.like]: `%${searchLower}%`
+          })
+        ]
+      };
+    }
+
+    const products = await Product.findAll({ where: whereClause });
+
     res.json(products);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+
 
 // GET /products/:id - Get product details by ID
 router.get('/:id', async (req, res) => {
