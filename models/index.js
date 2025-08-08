@@ -12,6 +12,10 @@ Product.hasMany(CartItem, { foreignKey: 'productId' });
 Order.belongsToMany(Product, { through: OrderProduct, foreignKey: 'orderId' });
 Product.belongsToMany(Order, { through: OrderProduct, foreignKey: 'productId' });
 
+OrderProduct.belongsTo(Product, { foreignKey: 'productId' });
+Product.hasMany(OrderProduct, { foreignKey: 'productId' });
+
+
 export {
   Product,
   CartItem,
