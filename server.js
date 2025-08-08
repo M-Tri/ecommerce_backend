@@ -24,7 +24,7 @@ const PORT = process.env.PORT || 3000;
     await sequelize.authenticate();
     console.log('Connection to SQLite has been established successfully.');
 
-    // await sequelize.sync();
+    // await sequelize.sync()
     await sequelize.sync({ force: true });
 
     console.log('Database synced.');
@@ -32,7 +32,13 @@ const PORT = process.env.PORT || 3000;
     // Seed products if table is empty
     const productCount = await Product.count();
     if (productCount === 0) {
-      await Product.bulkCreate(defaultProducts);
+      const flattenedProducts = defaultProducts.map(p => ({
+        ...p,
+        stars: p.rating ? p.rating.stars : null,
+        ratingCount: p.rating ? p.rating.count : null
+      }));
+
+      await Product.bulkCreate(flattenedProducts);
       console.log('Inserted default products into database.');
     }
 
