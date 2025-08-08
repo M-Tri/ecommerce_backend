@@ -31,82 +31,63 @@ router.get('/', async (req, res) => {
 // GET /orders/:id - Get one order by ID
 router.get('/:id', async (req, res) => {
   try {
+    const { expand } = req.query;
+
     const order = await Order.findByPk(req.params.id);
+
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
-    res.json(order);
+
+    if (expand === 'products') {
+      const orderProducts = await OrderProduct.findAll({
+        where: { orderId: order.id },
+        attributes: ['productId', 'quantity', 'estimatedDeliveryTimeMs'],
+        include: [{
+          model: Product,
+          attributes: ['id', 'image', 'name', 'priceCents', 'keywords', 'stars', 'ratingCount']
+        }]
+      });
+
+      // Format the response to match your desired structure
+      const products = orderProducts.map(op => {
+        const p = op.Product;
+        return {
+          productId: op.productId,
+          quantity: op.quantity,
+          estimatedDeliveryTimeMs: op.estimatedDeliveryTimeMs,
+          productDetails: {
+            id: p.id,
+            image: p.image,
+            name: p.name,
+            priceCents: p.priceCents,
+            keywords: p.keywords,
+            rating: {
+              stars: p.stars || 0,
+              count: p.ratingCount || 0
+            }
+          }
+        };
+      });
+
+      return res.json({
+        id: order.id,
+        orderTimeMs: order.orderTimeMs,
+        totalCostCents: order.totalCostCents,
+        products
+      });
+    } else {
+      // If no expand param, just return order without product details
+      return res.json(order);
+    }
+
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// // POST /orders - Create a new order
-// router.post('/', async (req, res) => {
-//   try {
-//     const { products, deliveryOptionId } = req.body;
 
-//     if (!products || !Array.isArray(products) || products.length === 0) {
-//       return res.status(400).json({ error: 'Cart must contain products' });
-//     }
-    
-//     // Fetch products from DB to validate and get prices
-//     const productIds = products.map(p => p.productId);
-//     const dbProducts = await Product.findAll({
-//       where: { id: productIds }
-//     });
-
-//     if (dbProducts.length !== products.length) {
-//       return res.status(400).json({ error: 'Some products do not exist' });
-//     }
-
-//     // Validate delivery option
-//     const deliveryOption = await DeliveryOption.findByPk(deliveryOptionId);
-//     if (!deliveryOption) {
-//       return res.status(400).json({ error: 'Invalid delivery option' });
-//     }
-
-//     // Calculate subtotal (products)
-//     let subtotalCents = 0;
-//     products.forEach(cartItem => {
-//       const product = dbProducts.find(p => p.id === cartItem.productId);
-//       subtotalCents += product.priceCents * cartItem.quantity;
-//     });
-
-//     // Add shipping cost
-//     const shippingCents = deliveryOption.priceCents;
-
-//     // Calculate tax (10% on subtotal + shipping)
-//     const taxCents = Math.round((subtotalCents + shippingCents) * 0.10);
-
-//     const totalCostCents = subtotalCents + shippingCents + taxCents;
-
-//     // Create Order record
-//     const newOrder = await Order.create({
-//       orderTimeMs: Date.now(),
-//       totalCostCents,
-//       deliveryOptionId,
-//     });
-
-//     // Create OrderProduct entries (associating products with this order)
-//     const orderProductsPromises = products.map(cartItem =>
-//       OrderProduct.create({
-//         orderId: newOrder.id,
-//         productId: cartItem.productId,
-//         quantity: cartItem.quantity,
-//         estimatedDeliveryTimeMs: Date.now() + (deliveryOption.deliveryDays * 24 * 60 * 60 * 1000), // example ETA
-//       })
-//     );
-
-//     await Promise.all(orderProductsPromises);
-
-//     return res.status(201).json(newOrder);
-
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ error: 'Internal server error' });
-//   }
-// });
 
 router.post('/', async (req, res) => {
   try {
