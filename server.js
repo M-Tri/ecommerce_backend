@@ -80,7 +80,7 @@ const PORT = process.env.PORT || 3000;
     // Whenever someone visits .../images/anything, go look for a matching file inside the images/ folder.
     app.use('/images', express.static('images'));
 
-    app.use('/', routes);
+    app.use('/api', routes);
 
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
