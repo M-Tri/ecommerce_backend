@@ -24,7 +24,7 @@ const PORT = process.env.PORT || 3000;
     await sequelize.authenticate();
     console.log('Connection to SQLite has been established successfully.');
 
-    // await sequelize.sync()
+    // Reset database before inserting default data
     await sequelize.sync({ force: true });
 
     console.log('Database synced.');
