@@ -87,38 +87,31 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-
-
 router.post('/', async (req, res) => {
   try {
-    const { cart } = req.body;
-
-    if (!cart || !Array.isArray(cart) || cart.length === 0) {
-      return res.status(400).json({ error: 'Cart must contain products' });
-    }
-
-    const productIds = cart.map(item => item.productId);
-    const dbProducts = await Product.findAll({ where: { id: productIds } });
-
-    if (dbProducts.length !== cart.length) {
-      return res.status(400).json({ error: 'Some products do not exist' });
-    }
-
-    const deliveryOptionIds = [...new Set(cart.map(item => item.deliveryOptionId))];
-    const deliveryOptions = await DeliveryOption.findAll({
-      where: { id: deliveryOptionIds }
+    // Fetch all items from the CartItem table, including associated Product and DeliveryOption
+    const cartItems = await CartItem.findAll({
+      include: [
+        { model: Product },
+        { model: DeliveryOption }
+      ]
     });
 
-    if (deliveryOptions.length !== deliveryOptionIds.length) {
-      return res.status(400).json({ error: 'One or more delivery options are invalid' });
+    if (cartItems.length === 0) {
+      return res.status(400).json({ error: 'Cart is empty' });
     }
 
     let subtotalCents = 0;
     let totalShippingCents = 0;
 
-    const orderProductData = cart.map(item => {
-      const product = dbProducts.find(p => p.id === item.productId);
-      const delivery = deliveryOptions.find(d => d.id === item.deliveryOptionId);
+    // Build order product data based on cart items from DB
+    const orderProductData = cartItems.map(item => {
+      const product = item.Product;
+      const delivery = item.DeliveryOption;
+
+      if (!product || !delivery) {
+        throw new Error('Invalid product or delivery option in cart');
+      }
 
       const productTotal = product.priceCents * item.quantity;
       subtotalCents += productTotal;
@@ -127,7 +120,7 @@ router.post('/', async (req, res) => {
       return {
         productId: item.productId,
         quantity: item.quantity,
-        deliveryOptionId: item.deliveryOptionId,
+        deliveryOptionId: delivery.id,
         estimatedDeliveryTimeMs: Date.now() + (delivery.deliveryDays * 24 * 60 * 60 * 1000),
       };
     });
@@ -135,13 +128,13 @@ router.post('/', async (req, res) => {
     const taxCents = Math.round((subtotalCents + totalShippingCents) * 0.10);
     const totalCostCents = subtotalCents + totalShippingCents + taxCents;
 
-    // Create the Order
+    // Create the order
     const newOrder = await Order.create({
       orderTimeMs: Date.now(),
       totalCostCents
     });
 
-    // Store each OrderProduct
+    // Create OrderProduct entries
     await Promise.all(orderProductData.map(item =>
       OrderProduct.create({
         orderId: newOrder.id,
@@ -151,14 +144,10 @@ router.post('/', async (req, res) => {
       })
     ));
 
-    // Remove the products from the CartItem table
-    await CartItem.destroy({
-      where: {
-        productId: productIds
-      }
-    });
+    // Clear the CartItem table after order is created
+    await CartItem.destroy({ where: {} });
 
-    // Build response
+    // Respond with the new order info and products
     const response = {
       id: newOrder.id,
       orderTimeMs: newOrder.orderTimeMs,
@@ -177,7 +166,6 @@ router.post('/', async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 
 // PUT /orders/:id
 router.put('/:id', async (req, res) => {
