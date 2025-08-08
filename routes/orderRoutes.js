@@ -3,6 +3,8 @@ import { Order } from '../models/Orders.js';
 import { Product } from '../models/Products.js';
 import { DeliveryOption } from '../models/DeliveryOptions.js';
 import { OrderProduct } from '../models/OrderProduct.js';
+import { CartItem } from '../models/CartItem.js';
+
 
 const router = express.Router();
 
@@ -106,7 +108,6 @@ router.get('/:id', async (req, res) => {
 //   }
 // });
 
-// POST /orders - Create a new order
 router.post('/', async (req, res) => {
   try {
     const { cart } = req.body;
@@ -122,7 +123,6 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Some products do not exist' });
     }
 
-    // Collect all needed deliveryOptions
     const deliveryOptionIds = [...new Set(cart.map(item => item.deliveryOptionId))];
     const deliveryOptions = await DeliveryOption.findAll({
       where: { id: deliveryOptionIds }
@@ -135,7 +135,6 @@ router.post('/', async (req, res) => {
     let subtotalCents = 0;
     let totalShippingCents = 0;
 
-    // Calculate costs and estimated delivery per item
     const orderProductData = cart.map(item => {
       const product = dbProducts.find(p => p.id === item.productId);
       const delivery = deliveryOptions.find(d => d.id === item.deliveryOptionId);
@@ -171,6 +170,13 @@ router.post('/', async (req, res) => {
       })
     ));
 
+    // Remove the products from the CartItem table
+    await CartItem.destroy({
+      where: {
+        productId: productIds
+      }
+    });
+
     // Build response
     const response = {
       id: newOrder.id,
@@ -190,6 +196,7 @@ router.post('/', async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 // PUT /orders/:id
 router.put('/:id', async (req, res) => {
