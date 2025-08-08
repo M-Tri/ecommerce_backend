@@ -29,10 +29,6 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Invalid productId or quantity' });
   }
 
-  if (typeof quantity !== 'number' || quantity < 1 || quantity > 10) {
-    return res.status(400).json({ error: 'Quantity must be a number between 1 and 10' });
-  }
-
   try {
     const product = await Product.findByPk(productId);
     if (!product) {
