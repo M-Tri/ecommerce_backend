@@ -1,178 +1,85 @@
-```markdown
+````markdown
 # Ecommerce Backend API
 
 ---
 
 ## Overview
 
-This backend API is built with **Express** and **Sequelize** and follows the **MVC pattern** (without a view layer). It serves as the backend for an ecommerce application, providing RESTful endpoints for products, carts, orders, and more.
+This backend API is built with **Express** and **Sequelize** using the **MVC pattern** (without a view layer).  
+It provides RESTful endpoints for products, carts, orders, and more, serving as the backend for an ecommerce application.
 
 ---
 
-## Request Flow
+## Features
 
-```
-
-Browser (Client)
-↓
-HTTP Request
-↓
-Express App (server.js / app.js)
-↓
-Middleware (e.g., express.json(), cors())
-↓
-Routes (via app.use, matched by path & method)
-↓
-Controllers (handle requests, send responses)
-↓
-HTTP Response (JSON, text, etc.)
-
-````
+- RESTful API endpoints for products, carts, and orders  
+- Sequelize ORM for database management  
+- Follows the MVC pattern (Models → Controllers → Routes)  
+- JSON responses only (no frontend rendering)  
 
 ---
 
-## Setup and Commands
+## Setup & Installation
 
-Initialize a new Node.js project:
+1. **Clone the repository**  
 
 ```bash
-npm init -y
+git clone <repository-url>
+cd ecommerce-backend
 ````
 
-> The `-y` flag automatically accepts all defaults.
-
-Install dependencies:
+2. **Install dependencies**
 
 ```bash
-npm install express dotenv
+npm install
 ```
 
-Start the server:
+3. **Start the server**
 
 ```bash
 node server.js
 ```
 
+> The API will run on `http://localhost:3000` by default.
 ---
 
-## Code Structure & MVC Pattern
+## Project Structure
 
-### Model
-
-* Defined using **Sequelize** to represent database tables.
-* Provides built-in methods like `findAll()`, `create()`, `findByPk()`.
-* These methods are called by controllers but do not execute on their own.
-
-### Controller (Route Handlers)
-
-* Handle application logic.
-* Call model methods in response to HTTP requests.
-* Send JSON responses directly to clients.
-
-### No View Layer
-
-* This is a pure API backend.
-* No frontend views or templates — data is sent in JSON format.
+```
+ecommerce-backend/
+│
+├─ models/          # Sequelize models
+├─ routes/          # API routes
+├─ controllers/     # Request handlers
+├─ server.js        # Entry point
+├─ database.sqlite  # SQLite database
+├─ dist/            # Optional build output
+└─ README.md
+```
 
 ---
 
-## Important Notes
+## Notes for Developers
 
-### Export Syntax
+* **Database:**
 
-* `export`:
-  Must export and import with **exact names** using `{}`.
+  * Temporary `sequelize.sync({ force: true })` resets the database on every start — remove in production.
+  * Uses SQLite for simple persistence.
 
-  ```js
-  export function foo() { }
-  import { foo } from './file.js';
-  ```
+* **Relationships:**
 
-* `export default`:
-  Export and import using **any name** without `{}`.
-
-  ```js
-  export default function foo() { }
-  import anyName from './file.js';
-  ```
+  * Orders and Products have a many-to-many relationship via a join table (`OrderProduct`).
 
 ---
 
-## Development Log
+## Acknowledgments
 
-### July 29
-
-* Temporary use of `await sequelize.sync({ force: true });` resets DB on every start — remove after testing.
-* Data models need refining for `NOT NULL` constraints to avoid missing fields errors.
-* Temp data available at `http://localhost:3000/api/products`.
-
-### July 31
-
-* Changed API endpoint:
-  from `/api/products` to `/products`.
-* Note: Tables are dropped and recreated on every server restart.
-* Run lint fix:
-
-  ```bash
-  npx eslint . --fix
-  ```
-
-### August 2
-
-* Added PUT request for updating cart items (quantity, delivery option).
-
-* Sample PUT request in Postman:
-
-  ```
-  URL: cart-items/8c9c52b5-5a19-4bcb-a5d1-158a74287c53
-  Body:
-  {
-    "quantity": 5,
-    "deliveryOption": 2
-  }
-  ```
-
-* Database reset behavior should be checked—SQLite appears to persist some data.
-
-### August 3
-
-* Tested PUT requests with JSON body:
-
-  ```json
-  {
-    "quantity": 3,
-    "deliveryOption": "2"
-  }
-  ```
-
-* Some routes require **admin authorization** (to be implemented).
-
-* Investigate Sequelize many-to-many setup between Orders and Products:
-
-  ```js
-  Order.belongsToMany(Product, { through: OrderProduct, foreignKey: 'orderId' });
-  Product.belongsToMany(Order, { through: OrderProduct, foreignKey: 'productId' });
-  ```
-
-### August 7
-
-* Many-to-Many relationship explained:
-
-  * One Order can contain many Products.
-  * One Product can belong to many Orders.
-  * A join table (`OrderProduct`) is required to map this relationship.
-
----
-
-## Next Steps
-
-* Remove forced DB sync in production.
-* Implement admin authorization middleware.
-* Complete and refine data models.
-* Expand API functionality (e.g., order management, user authentication).
+This project was developed based on the tutorials provided by [SuperSimpleDiv](https://www.youtube.com/@SuperSimpleDev). Their tutorials on building a React ecommerce project were instrumental in creating this backend.
 
 ---
 
 ## License
 
 This project is open source and free to use.
+
+```
