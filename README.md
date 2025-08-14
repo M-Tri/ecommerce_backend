@@ -81,5 +81,3 @@ This project was developed based on the tutorials provided by [SuperSimpleDiv](h
 ## License
 
 This project is open source and free to use.
-
-```
