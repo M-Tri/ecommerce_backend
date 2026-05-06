@@ -4,6 +4,7 @@ import { Product } from '../models/Products.js';
 import { DeliveryOption } from '../models/DeliveryOptions.js';
 import { OrderProduct } from '../models/OrderProduct.js';
 import { CartItem } from '../models/CartItem.js';
+import { sequelize } from '../db.js';
 
 
 const router = express.Router();
@@ -88,16 +89,20 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
+  const transaction = await sequelize.transaction();
+
   try {
     // Fetch all items from the CartItem table, including associated Product and DeliveryOption
     const cartItems = await CartItem.findAll({
       include: [
         { model: Product },
         { model: DeliveryOption }
-      ]
+      ],
+      transaction
     });
 
     if (cartItems.length === 0) {
+      await transaction.rollback();
       return res.status(400).json({ error: 'Cart is empty' });
     }
 
@@ -132,7 +137,7 @@ router.post('/', async (req, res) => {
     const newOrder = await Order.create({
       orderTimeMs: Date.now(),
       totalCostCents
-    });
+    }, { transaction });
 
     // Create OrderProduct entries
     await Promise.all(orderProductData.map(item =>
@@ -141,11 +146,12 @@ router.post('/', async (req, res) => {
         productId: item.productId,
         quantity: item.quantity,
         estimatedDeliveryTimeMs: item.estimatedDeliveryTimeMs
-      })
+      }, { transaction })
     ));
 
     // Clear the CartItem table after order is created
-    await CartItem.destroy({ where: {} });
+    await CartItem.destroy({ where: {}, transaction });
+    await transaction.commit();
 
     // Respond with the new order info and products
     const response = {
@@ -162,6 +168,7 @@ router.post('/', async (req, res) => {
     return res.status(201).json(response);
 
   } catch (error) {
+    await transaction.rollback();
     console.error(error);
     return res.status(500).json({ error: 'Internal server error' });
   }

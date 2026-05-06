@@ -6,6 +6,26 @@ import { Op, fn, col } from 'sequelize';
 
 const router = express.Router();
 
+const validateProductPayload = body => {
+  if (!body.name || typeof body.name !== 'string' || body.name.trim() === '') {
+    return 'Product name is required';
+  }
+
+  if (!body.image || typeof body.image !== 'string' || body.image.trim() === '') {
+    return 'Product image is required';
+  }
+
+  if (!Number.isInteger(body.priceCents) || body.priceCents < 0) {
+    return 'priceCents must be a non-negative integer';
+  }
+
+  if (!Array.isArray(body.keywords)) {
+    return 'keywords must be an array';
+  }
+
+  return null;
+};
+
 router.get('/', async (req, res) => {
   try {
     const search = req.query.search;
@@ -54,6 +74,11 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const body = req.body;
+    const validationError = validateProductPayload(body);
+
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
+    }
 
     const newProduct = await Product.create({
       id: body.id,
@@ -83,6 +108,11 @@ router.put('/:id', async (req, res) => {
     }
 
     const body = req.body;
+    const validationError = validateProductPayload(body);
+
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
+    }
 
     const updatedFields = {
       name: body.name,

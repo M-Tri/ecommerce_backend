@@ -7,7 +7,14 @@ export const CartItem = sequelize.define('CartItem', {
     type: DataTypes.UUID,
     allowNull: false,
   },
-  quantity: DataTypes.INTEGER,
+  quantity: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
+      min: 1,
+      max: 10
+    }
+  },
   deliveryOptionId: {
     type: DataTypes.STRING,
     allowNull: false,

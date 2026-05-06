@@ -23,9 +23,10 @@ router.get('/', async (req, res) => {
 
 // POST /cart-items
 router.post('/', async (req, res) => {
-  const { productId, quantity, deliveryOption = 1 } = req.body;
+  const { productId, quantity } = req.body;
+  const deliveryOptionId = req.body.deliveryOptionId ?? req.body.deliveryOption ?? '1';
 
-  if (!productId || typeof quantity !== 'number' || quantity <= 0) {
+  if (!productId || !Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
     return res.status(400).json({ error: 'Invalid productId or quantity' });
   }
 
@@ -38,14 +39,14 @@ router.post('/', async (req, res) => {
     let cartItem = await CartItem.findOne({ where: { productId } });
 
     if (cartItem) {
-      cartItem.quantity += quantity;
-      cartItem.deliveryOption = deliveryOption;
+      cartItem.quantity = Math.min(cartItem.quantity + quantity, 10);
+      cartItem.deliveryOptionId = deliveryOptionId;
       await cartItem.save();
     } else {
       cartItem = await CartItem.create({
         productId,
         quantity,
-        deliveryOption
+        deliveryOptionId
       });
     }
 
@@ -58,14 +59,14 @@ router.post('/', async (req, res) => {
 // PUT /cart-items/:productId
 router.put('/:productId', async (req, res) => {
   const { productId } = req.params;
-  const { quantity, deliveryOption } = req.body;
+  const { quantity, deliveryOptionId } = req.body;
 
-  if (!quantity && !deliveryOption) {
-    return res.status(400).json({ error: 'At least one field (quantity or deliveryOption) must be provided' });
+  if (quantity === undefined && deliveryOptionId === undefined) {
+    return res.status(400).json({ error: 'At least one field (quantity or deliveryOptionId) must be provided' });
   }
 
-  if (quantity !== undefined && (typeof quantity !== 'number' || quantity < 1 || quantity > 10)) {
-    return res.status(400).json({ error: 'Quantity must be a number between 1 and 10' });
+  if (quantity !== undefined && (!Number.isInteger(quantity) || quantity < 1 || quantity > 10)) {
+    return res.status(400).json({ error: 'Quantity must be an integer between 1 and 10' });
   }
 
   try {
@@ -78,8 +79,8 @@ router.put('/:productId', async (req, res) => {
     if (quantity !== undefined) {
       cartItem.quantity = quantity;
     }
-    if (deliveryOption !== undefined) {
-      cartItem.deliveryOption = deliveryOption;
+    if (deliveryOptionId !== undefined) {
+      cartItem.deliveryOptionId = deliveryOptionId;
     }
 
     await cartItem.save();

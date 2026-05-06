@@ -10,26 +10,42 @@ export const Product = sequelize.define('Product', {
   },
   image: {
     type: DataTypes.STRING,
-    allowNull: true
+    allowNull: false,
+    validate: {
+      notEmpty: true
+    }
   },
   name: {
     type: DataTypes.STRING,
-    allowNull: true
+    allowNull: false,
+    validate: {
+      notEmpty: true
+    }
   },
   stars: {
     type: DataTypes.FLOAT,
-    allowNull: true
+    allowNull: true,
+    validate: {
+      min: 0,
+      max: 5
+    }
   },
   ratingCount: {
     type: DataTypes.INTEGER,
-    allowNull: true
+    allowNull: true,
+    validate: {
+      min: 0
+    }
   },
   priceCents: {
     type: DataTypes.INTEGER,
-    allowNull: true
+    allowNull: false,
+    validate: {
+      min: 0
+    }
   },
   keywords: {
     type: DataTypes.JSON,
-    allowNull: true
+    allowNull: false
   }
 });

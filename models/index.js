@@ -8,7 +8,7 @@ import { OrderProduct } from './OrderProduct.js';
 CartItem.belongsTo(Product, { foreignKey: 'productId' });
 Product.hasMany(CartItem, { foreignKey: 'productId' });
 
-// CartItem <-> DeliveryOption ✅ Add this
+// CartItem <-> DeliveryOption 
 CartItem.belongsTo(DeliveryOption, { foreignKey: 'deliveryOptionId' });
 DeliveryOption.hasMany(CartItem, { foreignKey: 'deliveryOptionId' });
 
