@@ -91,15 +91,15 @@ node server.js
 
 ### July 29
 
-* Temporary use of `await sequelize.sync({ force: true });` resets DB on every start — remove after testing.
-* Data models need refining for `NOT NULL` constraints to avoid missing fields errors.
+* Server startup now uses `await sequelize.sync();` and does not force-reset the database.
+* Product and cart item models now include stronger `NOT NULL` constraints and basic validation.
 * Temp data available at `http://localhost:3000/api/products`.
 
 ### July 31
 
 * Changed API endpoint:
   from `/api/products` to `/products`.
-* Note: Tables are dropped and recreated on every server restart.
+* Note: Tables are only dropped and recreated when running `npm run db:reset`.
 * Run lint fix:
 
   ```bash
@@ -117,7 +117,7 @@ node server.js
   Body:
   {
     "quantity": 5,
-    "deliveryOption": 2
+    "deliveryOptionId": "2"
   }
   ```
 
@@ -130,7 +130,7 @@ node server.js
   ```json
   {
     "quantity": 3,
-    "deliveryOption": "2"
+    "deliveryOptionId": "2"
   }
   ```
 
