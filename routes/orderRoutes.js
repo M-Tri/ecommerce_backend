@@ -5,6 +5,7 @@ import { DeliveryOption } from '../models/DeliveryOptions.js';
 import { OrderProduct } from '../models/OrderProduct.js';
 import { CartItem } from '../models/CartItem.js';
 import { sequelize } from '../db.js';
+import adminAuth from '../middleware/adminAuth.js';
 
 
 const router = express.Router();
@@ -175,7 +176,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /orders/:id
-router.put('/:id', async (req, res) => {
+router.put('/:id', adminAuth, async (req, res) => {
   try {
     const { cart } = req.body;
     const order = await Order.findByPk(req.params.id);
@@ -255,7 +256,7 @@ router.put('/:id', async (req, res) => {
 
 
 // DELETE /orders/:id - Delete/cancel an order
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', adminAuth, async (req, res) => {
   try {
     const deletedCount = await Order.destroy({ where: { id: req.params.id } });
     if (deletedCount === 0) {
