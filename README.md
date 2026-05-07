@@ -87,8 +87,38 @@ Current test coverage:
 |---|---|
 | `tests/products.test.js` | `GET /api/products` returns seeded products |
 | `tests/products.test.js` | `GET /api/products?search=shirt` filters products by name or keyword |
+| `tests/products.test.js` | `POST /api/products` rejects requests without an admin secret |
+| `tests/products.test.js` | `POST /api/products` creates a product when the admin secret is valid |
 | `tests/cartItems.test.js` | `POST /api/cart-items` adds a valid product to the cart |
 | `tests/cartItems.test.js` | `POST /api/cart-items` rejects invalid quantities |
+
+## Admin Routes
+
+Product write routes require an admin secret:
+
+```text
+POST   /api/products
+PUT    /api/products/:id
+DELETE /api/products/:id
+```
+
+Send the secret with this header:
+
+```text
+x-admin-secret: your-secret-value
+```
+
+Set the local secret in `.env`:
+
+```env
+ADMIN_SECRET=change-this-dev-secret
+NODE_ENV=development
+```
+
+The reset route is extra restricted:
+
+- `POST /api/reset` is only registered when `NODE_ENV !== 'production'`
+- `POST /api/reset` also requires the `x-admin-secret` header
 
 ## API Endpoints
 
@@ -99,9 +129,9 @@ Current test coverage:
 | GET | `/api/products` | List products |
 | GET | `/api/products?search=shirt` | Search products |
 | GET | `/api/products/:id` | Get product by ID |
-| POST | `/api/products` | Create product |
-| PUT | `/api/products/:id` | Update product |
-| DELETE | `/api/products/:id` | Delete product |
+| POST | `/api/products` | Create product, admin only |
+| PUT | `/api/products/:id` | Update product, admin only |
+| DELETE | `/api/products/:id` | Delete product, admin only |
 | GET | `/api/cart-items` | List cart items |
 | GET | `/api/cart-items?expand=product` | List cart items with product details |
 | GET | `/api/cart-items/:productId` | Get a cart item |
@@ -116,7 +146,7 @@ Current test coverage:
 | PUT | `/api/orders/:id` | Update an order |
 | DELETE | `/api/orders/:id` | Delete an order |
 | GET | `/api/payment-summary` | Get cart payment summary |
-| POST | `/api/reset` | Clear database tables |
+| POST | `/api/reset` | Clear database tables, development + admin only |
 
 ## Example Requests
 
@@ -124,6 +154,7 @@ Create a product:
 
 ```bash
 curl -X POST http://localhost:3000/api/products \
+  -H "x-admin-secret: change-this-dev-secret" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Cotton T-Shirt",
