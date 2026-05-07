@@ -91,15 +91,20 @@ Current test coverage:
 | `tests/products.test.js` | `POST /api/products` creates a product when the admin secret is valid |
 | `tests/cartItems.test.js` | `POST /api/cart-items` adds a valid product to the cart |
 | `tests/cartItems.test.js` | `POST /api/cart-items` rejects invalid quantities |
+| `tests/orders.test.js` | `PUT /api/orders/:id` rejects requests without an admin secret |
+| `tests/orders.test.js` | `DELETE /api/orders/:id` rejects requests without an admin secret |
+| `tests/orders.test.js` | `DELETE /api/orders/:id` deletes an order when the admin secret is valid |
 
 ## Admin Routes
 
-Product write routes require an admin secret:
+Product write routes and direct order modification routes require an admin secret:
 
 ```text
 POST   /api/products
 PUT    /api/products/:id
 DELETE /api/products/:id
+PUT    /api/orders/:id
+DELETE /api/orders/:id
 ```
 
 Send the secret with this header:
@@ -143,8 +148,8 @@ The reset route is extra restricted:
 | GET | `/api/orders/:id` | Get order by ID |
 | GET | `/api/orders/:id?expand=products` | Get order with products |
 | POST | `/api/orders` | Create order from current cart |
-| PUT | `/api/orders/:id` | Update an order |
-| DELETE | `/api/orders/:id` | Delete an order |
+| PUT | `/api/orders/:id` | Update an order, admin only |
+| DELETE | `/api/orders/:id` | Delete an order, admin only |
 | GET | `/api/payment-summary` | Get cart payment summary |
 | POST | `/api/reset` | Clear database tables, development + admin only |
 
