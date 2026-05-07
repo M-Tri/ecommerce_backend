@@ -4,10 +4,11 @@ import { Product } from '../models/Products.js';
 import { DeliveryOption } from '../models/DeliveryOptions.js';
 import { OrderProduct } from '../models/OrderProduct.js';
 import { CartItem } from '../models/CartItem.js';
+import adminAuth from '../middleware/adminAuth.js';
 
 const router = express.Router();
 
-router.post('/', async (req, res) => {
+router.post('/', adminAuth, async (req, res) => {
   try {
     // Delete all rows from each table
     await OrderProduct.destroy({ where: {}, truncate: true, cascade: true });

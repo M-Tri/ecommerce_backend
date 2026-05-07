@@ -19,7 +19,10 @@ router.use('/products', productRoutes);
 router.use('/orders', orderRoutes);
 router.use('/cart-items', cartItemRoutes);
 router.use('/delivery-options', deliveryOptionsRoutes);
-router.use('/reset', resetRoutes);
 router.use('/payment-summary', paymentSummaryRoutes);
+
+if (process.env.NODE_ENV !== 'production') {
+  router.use('/reset', resetRoutes);
+}
 
 export default router;

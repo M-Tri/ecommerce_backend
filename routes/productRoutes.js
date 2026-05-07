@@ -3,6 +3,7 @@ import { CartItem } from '../models/index.js';
 import { Product } from '../models/Products.js';
 import { sequelize } from '../db.js';
 import { Op, fn, col } from 'sequelize';
+import adminAuth from '../middleware/adminAuth.js';
 
 const router = express.Router();
 
@@ -70,8 +71,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-//Todo: add admin restriction
-router.post('/', async (req, res) => {
+router.post('/', adminAuth, async (req, res) => {
   try {
     const body = req.body;
     const validationError = validateProductPayload(body);
@@ -99,8 +99,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /products/:id.
-//Todo: add admin restriction
-router.put('/:id', async (req, res) => {
+router.put('/:id', adminAuth, async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);
     if (!product) {
@@ -132,7 +131,7 @@ router.put('/:id', async (req, res) => {
 
 
 // DELETE /products/:id - Delete a product
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', adminAuth, async (req, res) => {
   const t = await sequelize.transaction();
   try {
     // Delete related cart items first
